@@ -1,0 +1,21 @@
+[package]
+name = "wslpath"
+version = "0.0.1"
+edition = "2018"
+authors = ["Pratik Chowdhury pratikc@live.co.uk"]
+description = "Convert Windows to WSL Path and vice-versa"
+readme = "README.md"
+repository = "https://github.com/pratikpc/wsl-path-rust"
+exclude = [".devcontainer"]
+license = "MIT"
+homepage = "https://github.com/pratikpc/wsl-path-rust#readme"
+
+[lib]
+name = "wslpath"       # The name of the target.
+path = "src/lib.rs"    # The source file of the target.
+crate-type = ["lib"]   # The crate types to generate.
+required-features = [] # Features required to build this target (N/A for lib).
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
