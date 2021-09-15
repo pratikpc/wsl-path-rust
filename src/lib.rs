@@ -34,42 +34,36 @@ fn wsl_paths(
     Ok(wsl_path)
 }
 
-// Convert WSL Path to Windows Path
-// Pass Path and name of distro
-/// You can pass None if there is no distro
-/// None distro support added to make it easier
-/// For you to add it to your own library
+/// Convert WSL Path to Windows Path
+/// Pass Path and name of distro
 pub fn wsl_to_windows_with_distro(
     path: &str,
-    distro: Option<String>,
+    distro: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_paths(path, distro, false)
+    wsl_paths(path, Some(distro), false)
 }
 
 /// Convert WSL Path to Windows Path
 /// Pass path
 /// Uses default distro for execution by default
 pub fn wsl_to_windows(path: &str) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_to_windows_with_distro(path, None)
+    wsl_paths(path, None, false)
 }
 
 /// Convert Windows Path to WSL Path
 /// Pass Path and name of distro
-/// You can pass None if there is no distro
-/// None distro support added to make it easier
-/// For you to add it to your own library
-pub fn windows_to_wsl_for_distro(
+pub fn windows_to_wsl_with_distro(
     path: &str,
-    distro: Option<String>,
+    distro: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_paths(path, distro, true)
+    wsl_paths(path, Some(distro), true)
 }
 
 /// Convert Windows Path to WSL Path
 /// Pass path
 /// Uses default distro for execution by default
 pub fn windows_to_wsl(path: &str) -> Result<String, Box<dyn std::error::Error>> {
-    windows_to_wsl_for_distro(path, None)
+    wsl_paths(path, None, true)
 }
 
 #[cfg(test)]
@@ -83,6 +77,6 @@ mod tests {
     }
     #[test]
     fn test_windows_to_wsl() {
-        assert_eq!(windows_to_wsl("C:/").unwrap_or_default(), "/mnt/c");
+        assert_eq!(windows_to_wsl("C:/").unwrap_or_default(), "/mnt/c/");
     }
 }
