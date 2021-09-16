@@ -15,7 +15,8 @@ fn wsl_paths(
     // Based on this conversion takes place
     let path_arg = {
         if to_linux_path {
-            "-u".to_string()
+            // Return absolute paths
+            "-a".to_string()
         } else {
             // Convert to Windows
             "-m".to_string()
