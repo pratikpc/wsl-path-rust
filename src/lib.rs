@@ -1,34 +1,48 @@
 use std::process::Command;
 
+/// wslpath arguments
+pub enum Settings {
+    WindowsToWsl,
+    WslToWindows,
+    WslToWindowsLinuxStyle,
+}
+
 /// Convert Paths using the WSLPath Executable
-fn wsl_paths(
+pub fn convert_path(
     path: &str,
     distro: Option<String>,
-    to_linux_path: bool,
+    options: Settings,
+    force_absolute_path: bool,
 ) -> Result<String, Box<dyn std::error::Error>> {
     // Check if distro provided
-    let distro_args: Vec<String> = match distro {
+    let mut args: Vec<String> = match distro {
         Some(distro_name) => vec!["-d".to_string(), distro_name],
         None => vec![],
     };
+
+    args.push("-e".to_string());
+    args.push("wslpath".to_string());
+
     // Select path arg
     // Based on this conversion takes place
-    let path_arg = {
-        if to_linux_path {
-            // Return absolute paths
-            "-a".to_string()
-        } else {
-            // Convert to Windows
-            "-m".to_string()
+    args.push(
+        match options {
+            Settings::WindowsToWsl => "-u",
+            Settings::WslToWindows => "-w",
+            Settings::WslToWindowsLinuxStyle => "-m",
         }
-    };
+        .to_string(),
+    );
+
+    // force absolute path arg
+    if force_absolute_path {
+        args.push("-a".to_string());
+    }
+
     let stdout = Command::new("wsl.exe")
         // Specify the distro to select
-        .args(distro_args)
-        .arg("-e")
-        .arg("wslpath")
-        .arg(path_arg)
-        .arg(path.replace("\\", "\\\\"))
+        .args(args)
+        .arg(path.replace('\\', "\\\\"))
         .output()?
         .stdout;
     let wsl_path = std::str::from_utf8(&stdout)?.trim().to_string();
@@ -41,14 +55,14 @@ pub fn wsl_to_windows_with_distro(
     path: &str,
     distro: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_paths(path, Some(distro), false)
+    convert_path(path, Some(distro), Settings::WslToWindowsLinuxStyle, false)
 }
 
 /// Convert WSL Path to Windows Path
 /// Pass path
 /// Uses default distro for execution by default
 pub fn wsl_to_windows(path: &str) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_paths(path, None, false)
+    convert_path(path, None, Settings::WslToWindowsLinuxStyle, false)
 }
 
 /// Convert Windows Path to WSL Path
@@ -57,14 +71,14 @@ pub fn windows_to_wsl_with_distro(
     path: &str,
     distro: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_paths(path, Some(distro), true)
+    convert_path(path, Some(distro), Settings::WindowsToWsl, true)
 }
 
 /// Convert Windows Path to WSL Path
 /// Pass path
 /// Uses default distro for execution by default
 pub fn windows_to_wsl(path: &str) -> Result<String, Box<dyn std::error::Error>> {
-    wsl_paths(path, None, true)
+    convert_path(path, None, Settings::WindowsToWsl, true)
 }
 
 #[cfg(test)]
